@@ -1,51 +1,46 @@
-// controllers/dashboardController.js (Complete, Corrected File)
+// backend/controllers/dashboardController.js (Reverted File)
 
-// ✅ FIX: Use 'pool' to match the rest of your project
-const pool = require('../db/db');
+const pool = require('../db/db'); // Use pool
 
+// --- GET Dashboard Summary (Only this function remains) ---
 exports.getDashboardSummary = async (req, res) => {
-  const userId = req.user.user_id;
+  const userId = req.user?.user_id;
+  if (userId == null) return res.status(401).json({ message: "Unauthorized: User ID missing" });
 
   try {
-    // Query 1: Calculate total income and expense for the current month
+    // Query 1: Monthly Summary (Current Month)
     const monthlySummaryQuery = `
       SELECT
         COALESCE(SUM(CASE WHEN c.category_type = 'Income' THEN t.amount ELSE 0 END), 0) AS "monthly_income",
         COALESCE(SUM(CASE WHEN c.category_type = 'Expense' THEN t.amount ELSE 0 END), 0) AS "monthly_expense"
       FROM transaction t
-      JOIN category c ON t.category_id = c.category_id
+      LEFT JOIN category c ON t.category_id = c.category_id
       WHERE t.user_id = $1 AND date_trunc('month', t.transaction_date) = date_trunc('month', CURRENT_DATE)
     `;
-    // ✅ FIX: Use 'pool'
     const monthlySummaryResult = await pool.query(monthlySummaryQuery, [userId]);
-    const { monthly_income, monthly_expense } = monthlySummaryResult.rows[0];
+    const { monthly_expense } = monthlySummaryResult.rows[0] || { monthly_expense: 0 };
 
-
-    // Query 2: Calculate total balance (all-time income - all-time expense)
+    // Query 2: Total Balance
     const totalBalanceQuery = `
       SELECT
-        COALESCE(SUM(CASE WHEN c.category_type = 'Income' THEN t.amount ELSE 0 END), 0) - 
+        COALESCE(SUM(CASE WHEN c.category_type = 'Income' THEN t.amount ELSE 0 END), 0) -
         COALESCE(SUM(CASE WHEN c.category_type = 'Expense' THEN t.amount ELSE 0 END), 0) AS "total_balance"
       FROM transaction t
-      JOIN category c ON t.category_id = c.category_id
+      LEFT JOIN category c ON t.category_id = c.category_id
       WHERE t.user_id = $1
     `;
-    // ✅ FIX: Use 'pool'
     const totalBalanceResult = await pool.query(totalBalanceQuery, [userId]);
-    const { total_balance } = totalBalanceResult.rows[0];
+    const { total_balance } = totalBalanceResult.rows[0] || { total_balance: 0 };
 
-
-    // Query 3: Count total number of transactions
+    // Query 3: Transaction Count
     const transactionCountQuery = `
       SELECT COUNT(*) AS "total_transactions"
       FROM transaction
       WHERE user_id = $1
     `;
-    // ✅ FIX: Use 'pool'
     const transactionCountResult = await pool.query(transactionCountQuery, [userId]);
-    const { total_transactions } = transactionCountResult.rows[0];
+    const { total_transactions } = transactionCountResult.rows[0] || { total_transactions: 0 };
 
-    // Send a clean, flat JSON object back to the frontend
     res.json({
       total_balance: parseFloat(total_balance).toFixed(2),
       monthly_expense: parseFloat(monthly_expense).toFixed(2),
@@ -53,12 +48,14 @@ exports.getDashboardSummary = async (req, res) => {
     });
 
   } catch (err) {
-    console.error('❌ Error fetching dashboard data:', err.stack);
-    res.status(500).json({ message: 'Error fetching dashboard data' });
+    console.error('❌ Error fetching dashboard summary:', err.stack);
+    res.status(500).json({ message: 'Error fetching dashboard summary data' });
   }
 };
 
-// Make sure to export the function correctly
+// --- Estimate Affordability Function Removed ---
+
+// Only export the remaining function
 module.exports = {
-  getDashboardSummary
+  getDashboardSummary: exports.getDashboardSummary
 };

@@ -1,9 +1,8 @@
-// Create a new file: js/dashboard.js (Complete File)
+// js/dashboard.js (Reverted File)
 
 document.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("token");
   if (!token) {
-    // If no token, redirect to login, no need to run the rest of the code
     window.location.href = "login.html";
     return;
   }
@@ -14,9 +13,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalTransactionsSpan = document.getElementById("total-transactions");
   const logoutBtn = document.getElementById("logoutBtn");
 
-  // Check if all dashboard elements exist before proceeding
+  // Check required elements exist
   if (!totalBalanceSpan || !monthlyExpensesSpan || !totalTransactionsSpan) {
-    console.error("Dashboard widgets not found in the HTML.");
+    console.error("❌ Critical Error: One or more required dashboard widget elements were not found in the HTML.");
+    // Optionally display error in place of data
+    if(totalBalanceSpan) totalBalanceSpan.textContent = "Error";
+    if(monthlyExpensesSpan) monthlyExpensesSpan.textContent = "Error";
+    if(totalTransactionsSpan) totalTransactionsSpan.textContent = "Error";
     return;
   }
 
@@ -25,39 +28,35 @@ document.addEventListener("DOMContentLoaded", () => {
     Authorization: `Bearer ${token}`,
   };
 
-  // --- Fetch and Display Dashboard Data ---
+  // --- Fetch and Display Dashboard Summary Data ---
   const loadDashboardData = async () => {
     try {
-      // ✅ FIX: Call the correct endpoint
-      const res = await fetch("http://localhost:5000/api/dashboard", { headers });
+      const res = await fetch("http://localhost:5000/api/dashboard", { headers }); // Correct endpoint for summary
       if (!res.ok) {
-        throw new Error("Failed to fetch dashboard data.");
+        throw new Error(`Failed to fetch dashboard summary (${res.status})`);
       }
-
       const data = await res.json();
-
-      // ✅ FIX: Update the correct elements with the data from the new controller
       totalBalanceSpan.textContent = `₹${data.total_balance}`;
       monthlyExpensesSpan.textContent = `₹${data.monthly_expense}`;
       totalTransactionsSpan.textContent = data.total_transactions;
-      
-      console.log("✅ Dashboard data loaded successfully.");
-
+      console.log("✅ Dashboard summary loaded.");
     } catch (err) {
-      console.error("❌ Error loading dashboard:", err);
-      // Display an error message to the user in the widgets
+      console.error("❌ Error loading dashboard summary:", err);
       totalBalanceSpan.textContent = "Error";
       monthlyExpensesSpan.textContent = "Error";
       totalTransactionsSpan.textContent = "Error";
     }
   };
 
+  // --- Event Listener for Affordability Check Removed ---
+
+
   // --- Logout Functionality ---
   if (logoutBtn) {
     logoutBtn.addEventListener("click", (e) => {
-      e.preventDefault(); // Prevent default link behavior
+      e.preventDefault();
       localStorage.removeItem("token");
-      sessionStorage.removeItem("token"); // Also clear session storage
+      sessionStorage.removeItem("token");
       window.location.href = "login.html";
     });
   }

@@ -4,55 +4,180 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Categories</title>
+
+  <!-- Fonts + Bootstrap + Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f7faff;
+      color: #333;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg, #1e3c72, #2a5298);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      color: #fff;
+    }
+
+    .sidebar-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .nav-links a {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Form Section */
+    .main-content h1 {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #1e3c72;
+      margin-bottom: 1.5rem;
+    }
+
+    .transaction-form {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .transaction-form input,
+    .transaction-form select {
+      border-radius: 8px;
+      padding: 0.7rem;
+      border: 1px solid #ccc;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .submit-btn {
+      position: absolute;
+      bottom: 18px;
+      left: 25px;
+      background-color: #1e3c72;
+      border: none;
+      color: #fff;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+      background-color: #16335f;
+      transform: translateY(-2px);
+    }
+
+    /* Table */
+    .data-table {
+      background: #fff;
+      width: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .data-table th {
+      background-color: #1e3c72;
+      color: white;
+      font-weight: 600;
+      padding: 0.75rem;
+    }
+
+    .data-table td {
+      padding: 0.75rem;
+      vertical-align: middle;
+    }
+
+    .list-section h2 {
+      font-size: 1.4rem;
+      color: #1e3c72;
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+  </style>
 </head>
+
 <body>
-  <div class="container">
+  <div class="container-fluid">
+    <div class="row">
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <h2 class="sidebar-title">Finance Tracker</h2>
-      <nav class="nav-links">
-        <a href="index.html">🏠 Dashboard</a>
-        <a href="transaction.html">💳 Transactions</a>
-        <a href="budgets.html">📊 Budgets</a>
-        <a href="tags.html">🏷️ Tags</a>
-        <a href="categories.html">📂 Categories</a>
-        <a href="login.html">🚪 Logout</a>
-      </nav>
-    </aside>
+      <!-- Sidebar -->
+      <aside class="col-lg-2 col-md-3 p-0">
+        <div class="sidebar">
+          <h2 class="sidebar-title">Finance Tracker</h2>
+          <nav class="nav-links">
+            <a href="index.html">🏠 Dashboard</a>
+            <a href="transaction.html">💳 Transactions</a>
+            <a href="budgets.html">📊 Budgets</a>
+            <a href="tags.html">🏷️ Tags</a>
+            <a href="categories.html" class="active">📂 Categories</a>
+            <a href="login.html">🚪 Logout</a>
+          </nav>
+        </div>
+      </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <h1>Manage Categories</h1>
-      <form id="categoryForm" class="transaction-form">
-        <input type="text" name="name" placeholder="Category Name" required>
-        <select name="type">
-          <option value="Income">Income</option>
-          <option value="Expense">Expense</option>
-        </select>
-        <button type="submit" class="submit-btn">Add Category</button>
-      </form>
-      <table class="table table-striped table-hover"></table>
-      <div class="table-container">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Category Name</th>
-        <th>Type</th>
-      </tr>
-    </thead>
-    <tbody id="category-table-body">
-      </tbody>
-  </table>
-  <table class="table table-hover"></table>
-</div>
-    </main>
+      <!-- Main Content -->
+      <main class="col-lg-10 col-md-9 ms-sm-auto px-md-4 py-4 main-content">
+        <h1>Manage Categories</h1>
 
+        <!-- Category Form -->
+        <form id="categoryForm" class="transaction-form">
+          <input type="text" name="name" placeholder="Category Name" required>
+          <select name="type" required>
+            <option value="Income">Income</option>
+            <option value="Expense">Expense</option>
+          </select>
+          <br><br>
+          <button type="submit" class="submit-btn">
+            <i class="fa-solid fa-plus"></i> Add Category
+          </button>
+        </form>
+
+        <!-- Category List -->
+        <section class="list-section">
+          <h2>Category List</h2>
+          <div class="table-responsive">
+            <table class="data-table table-hover">
+              <thead>
+                <tr>
+                  <th>Category Name</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody id="category-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+    </div>
   </div>
 
   <script src="js/categories.js"></script>

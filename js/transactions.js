@@ -1,4 +1,4 @@
-// js/transactions.js (Complete, Updated File with Delete Functionality)
+// js/transactions.js (Complete, Updated File)
 
 document.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("token");
@@ -13,12 +13,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const categorySelect = document.getElementById("category");
   const tagsSelect = document.getElementById("tags-select");
   const transactionsTbody = document.getElementById("transactions-tbody");
-  const transactionDateTimeField = document.getElementById("transaction-datetime");
+  const transactionDateTimeField = document.getElementById("transaction-datetime"); // Get the optional field
 
+  // Add check for the new date/time field
   if (!form || !categorySelect || !tagsSelect || !transactionsTbody || !transactionDateTimeField) {
     console.error("❌ Required DOM elements not found. Check your HTML IDs.");
     if (transactionsTbody) {
-       transactionsTbody.innerHTML = `<tr><td colspan="7">Page Error: UI elements missing.</td></tr>`; // Colspan is now 7
+       transactionsTbody.innerHTML = `<tr><td colspan="7">Page Error: UI elements missing.</td></tr>`; // Colspan 7
     }
     return;
   }
@@ -29,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- Load Categories ---
-  const loadCategories = async () => { /* ... (keep existing function) ... */ 
+  const loadCategories = async () => {
     console.log("Attempting to load categories...");
     try {
       const res = await fetch("http://localhost:5000/api/categories", { headers });
@@ -38,15 +39,17 @@ document.addEventListener("DOMContentLoaded", () => {
       if (res.status === 401) {
           console.error("❌ Unauthorized (401): Invalid token during category load.");
           categorySelect.innerHTML = `<option value="">Auth Error</option>`;
-          transactionsTbody.innerHTML = `<tr><td colspan="7">Authentication error. Please log in again.</td></tr>`; 
+          transactionsTbody.innerHTML = `<tr><td colspan="7">Authentication error. Please log in again.</td></tr>`; // Colspan 7
           return;
       }
-      if (!res.ok) { 
-          const errorText = await res.text(); 
+      if (!res.ok) {
+          const errorText = await res.text();
           console.error(`❌ Category fetch failed: Status ${res.status}. Response: ${errorText}`);
           categorySelect.innerHTML = `<option value="">Load Failed</option>`;
-          return; 
+          // Allow script to continue loading other data if categories fail
+          // return; // Removed this
       }
+
       if (res.ok) {
         const categories = await res.json();
         categorySelect.innerHTML = `<option value="">Select Category</option>`;
@@ -65,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- Load Tags ---
-  const loadTags = async () => { /* ... (keep existing function) ... */ 
+  const loadTags = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/tags", { headers });
        if (!res.ok) throw new Error(`Tag fetch failed: ${res.status}`);
@@ -93,12 +96,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!res.ok) {
          const errorText = await res.text();
          console.error(`❌ Transaction fetch failed: Status ${res.status}. Response: ${errorText}`);
-         transactionsTbody.innerHTML = `<tr><td colspan="7">Error loading transactions.</td></tr>`; // Colspan 7
+         transactionsTbody.innerHTML = `<tr><td colspan="7">Error loading transactions. Check console.</td></tr>`; // Colspan 7
          return;
       }
 
       const transactions = await res.json();
-      transactionsTbody.innerHTML = "";
+      transactionsTbody.innerHTML = ""; // Clear only on success
 
       if (transactions.length === 0) {
         transactionsTbody.innerHTML = `<tr><td colspan="7">No transactions found. Add one above!</td></tr>`; // Colspan 7
@@ -125,9 +128,8 @@ document.addEventListener("DOMContentLoaded", () => {
             dateTimeString = "N/A";
         }
 
-        // ✅ FIX: Added new <td> for the delete button
-        // Added Bootstrap classes btn, btn-danger (red), btn-sm (small), rounded-pill (elongated)
-        // Added data-id attribute to store the transaction ID
+        // ✅ FIX: Removed the incorrect comment syntax
+        // ✅ FIX: Added new <td> for delete button
         row.innerHTML = `
           <td>${parseFloat(tran.amount).toFixed(2)}</td>
           <td>${tran.description || "-"}</td>
@@ -137,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <td>${tran.payment_mode || "-"}</td>
           <td>
             <button class="btn btn-danger btn-sm rounded-pill delete-transaction-btn" data-id="${tran.transaction_id}">
-              <i class="fas fa-trash-alt"></i> Delete 
+              <i class="fas fa-trash-alt"></i> Delete
             </button>
           </td>
         `;
@@ -145,75 +147,59 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       console.log("✅ Transactions loaded successfully.");
 
-      // ✅ FIX: Attach listeners AFTER rows are added to the DOM
+      // Attach listeners AFTER rows are added to the DOM
       attachDeleteListeners();
 
     } catch (err) {
       console.error("❌ Network or parsing error fetching transactions:", err);
-      transactionsTbody.innerHTML = `<tr><td colspan="7">Error loading transactions.</td></tr>`; // Colspan 7
+      transactionsTbody.innerHTML = `<tr><td colspan="7">Error loading transactions. Check console.</td></tr>`; // Colspan 7
     }
   };
 
-  // --- NEW Function to Attach Delete Button Listeners ---
+  // --- Attach Delete Button Listeners ---
   const attachDeleteListeners = () => {
-    const deleteButtons = transactionsTbody.querySelectorAll('.delete-transaction-btn');
-    deleteButtons.forEach(button => {
-      // Remove existing listener to prevent duplicates if loadTransactions is called multiple times
-      button.replaceWith(button.cloneNode(true)); 
-    });
-    // Add new listeners to the cloned buttons
-    transactionsTbody.querySelectorAll('.delete-transaction-btn').forEach(button => {
-       button.addEventListener('click', handleDeleteTransaction);
+    // Use event delegation on the table body for efficiency
+    transactionsTbody.addEventListener('click', function(event) {
+        // Check if the clicked element is a delete button
+        if (event.target.classList.contains('delete-transaction-btn') || event.target.closest('.delete-transaction-btn')) {
+            const button = event.target.closest('.delete-transaction-btn');
+            handleDeleteTransaction(button);
+        }
     });
   };
 
-  // --- NEW Function to Handle Delete Click ---
-  const handleDeleteTransaction = async (event) => {
-    const button = event.currentTarget; // Use currentTarget to ensure we get the button
-    const transactionId = button.dataset.id; // Get ID from data-id attribute
+  // --- Handle Delete Click ---
+  const handleDeleteTransaction = async (button) => {
+    const transactionId = button.dataset.id;
+    if (!transactionId) return;
 
-    if (!transactionId) {
-        console.error("Delete button clicked but no transaction ID found.");
-        return;
-    }
-
-    // Confirmation dialog
     if (confirm(`Are you sure you want to delete transaction ID ${transactionId}?`)) {
       console.log(`Attempting to delete transaction ID: ${transactionId}`);
       try {
         const res = await fetch(`http://localhost:5000/api/transactions/${transactionId}`, {
           method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!res.ok) {
           let errorMsg = `Failed to delete (${res.status})`;
-          try {
-            const errorData = await res.json();
-            errorMsg = errorData.message || errorMsg;
-          } catch(e) {}
+          try { const errorData = await res.json(); errorMsg = errorData.message || errorMsg; } catch(e) {}
           throw new Error(errorMsg);
         }
 
         console.log(`Transaction ${transactionId} deleted successfully.`);
-        // Remove the row directly or reload the whole table
-        // button.closest('tr').remove(); // Option 1: Remove row visually
-        loadTransactions();       // Option 2: Reload data from server (safer)
+        loadTransactions(); // Reload data from server
 
       } catch (err) {
         console.error("❌ Error deleting transaction:", err);
         alert(`Error: ${err.message}`);
       }
-    } else {
-      console.log("Deletion cancelled by user.");
     }
   };
 
 
   // --- Add New Transaction ---
-  form.addEventListener("submit", async (e) => { /* ... (keep existing function) ... */ 
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const selectedTagOptions = [...tagsSelect.options].filter(option => option.selected);
@@ -227,12 +213,13 @@ document.addEventListener("DOMContentLoaded", () => {
       tag_ids: tag_ids,
     };
 
+    // Conditionally add transaction_date if user entered one
     const userDateTime = transactionDateTimeField.value;
     if (userDateTime) {
         try {
-             const dateObj = new Date(userDateTime); 
+             const dateObj = new Date(userDateTime);
              if (isNaN(dateObj.getTime())) throw new Error("Invalid date/time value selected.");
-             formData.transaction_date = dateObj.toISOString(); 
+             formData.transaction_date = dateObj.toISOString();
              console.log("Sending user-provided date (ISO format):", formData.transaction_date);
         } catch (dateErr) {
             alert("Invalid date/time format entered.");
@@ -257,17 +244,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!res.ok) {
         let errorMsg = `Failed to add transaction (${res.status})`;
-        try {
-            const errorData = await res.json();
-            errorMsg = errorData.message || errorData.error || errorMsg;
-        } catch (parseErr) {
-             console.error("Could not parse error response from backend.");
-        }
+        try { const errorData = await res.json(); errorMsg = errorData.message || errorData.error || errorMsg; } catch (parseErr) {}
         throw new Error(errorMsg);
       }
 
-      form.reset(); 
-      loadTransactions(); 
+      form.reset();
+      loadTransactions(); // Refresh list immediately
     } catch (err) {
       alert(`❌ Error: ${err.message}`);
       console.error("Error adding transaction:", err);
@@ -276,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Logout Button ---
   const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) { /* ... (keep existing listener) ... */ 
+  if (logoutBtn) {
     logoutBtn.addEventListener("click", (e) => {
       e.preventDefault();
       localStorage.removeItem("token");
@@ -287,7 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Initial Page Load ---
   async function initializePage() {
-    await loadCategories(); 
+    await loadCategories();
     await loadTags();
     await loadTransactions();
   }
