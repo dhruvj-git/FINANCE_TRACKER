@@ -1,0 +1,112 @@
+// js/tags.js (Complete File)
+
+document.addEventListener("DOMContentLoaded", () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("You are not logged in. Please log in.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  // --- DOM Elements ---
+  const tagForm = document.getElementById("tagForm");
+  // FIX: Target the new table body ID for clarity
+  const tagTableBody = document.getElementById("tag-table-body");
+
+  if (!tagForm || !tagTableBody) {
+    console.error("Required elements not found in HTML.");
+    return;
+  }
+
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+
+  // --- Function to Load and Display Tags ---
+  const loadTags = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/tags", { headers });
+      if (!res.ok) throw new Error("Failed to fetch tags");
+
+      const tags = await res.json();
+      tagTableBody.innerHTML = ""; // Clear old rows
+
+      if (tags.length === 0) {
+        tagTableBody.innerHTML = `<tr><td colspan="3">No tags found. Add one!</td></tr>`;
+        return;
+      }
+
+      tags.forEach((tag) => {
+        const row = document.createElement("tr");
+        // FIX: Updated row to display usage_count and better buttons
+        row.innerHTML = `
+          <td>${tag.tag_name}</td>
+          <td>${tag.usage_count}</td>
+          <td class="actions">
+            <button class="delete-btn" data-id="${tag.tag_id}">Delete</button>
+          </td>
+        `;
+        tagTableBody.appendChild(row);
+      });
+
+      // Re-attach delete event listeners after rendering
+      attachDeleteListeners();
+
+    } catch (err) {
+      console.error("❌ Error fetching tags:", err);
+      tagTableBody.innerHTML = `<tr><td colspan="3">Error loading tags.</td></tr>`;
+    }
+  };
+
+  // --- Function to Attach Delete Listeners ---
+  const attachDeleteListeners = () => {
+    document.querySelectorAll(".delete-btn").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.getAttribute("data-id");
+        if (confirm("Are you sure you want to delete this tag?")) {
+          try {
+            const delRes = await fetch(`http://localhost:5000/api/tags/${id}`, {
+              method: "DELETE",
+              headers,
+            });
+            if (delRes.ok) {
+              loadTags(); // Refresh the list
+            } else {
+              alert("❌ Failed to delete tag.");
+            }
+          } catch (err) {
+            console.error("Deletion error:", err);
+          }
+        }
+      });
+    });
+  };
+
+  // --- Event Listener for Adding a New Tag ---
+  tagForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const tagNameInput = document.getElementById("tag_name");
+    const body = { tag_name: tagNameInput.value };
+
+    try {
+      const res = await fetch("http://localhost:5000/api/tags", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        tagForm.reset();
+        loadTags(); // Refresh the list
+      } else {
+        alert("❌ Failed to add tag.");
+      }
+    } catch (err) {
+      console.error("Error adding tag:", err);
+    }
+  });
+
+  // --- Initial Load ---
+  loadTags();
+});

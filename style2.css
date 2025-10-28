@@ -1,0 +1,186 @@
+/* =============================================
+   1. FONT IMPORT & GLOBAL VARIABLES
+   ============================================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Color Palette */
+  --bg-body: #f5f5f7;          /* Light gray background, like on apple.com */
+  --bg-surface: #ffffff;      /* Pure white for cards and surfaces */
+  --text-primary: #1d1d1f;      /* Near-black for primary text */
+  --text-secondary: #6e6e73;    /* Gray for subtitles and secondary text */
+  --border-color: #d2d2d7;      /* Subtle border color */
+  --accent-color: #0071e3;      /* Apple's signature blue */
+  --accent-rgb: 0, 113, 227;   /* Same blue, for use in rgba() */
+
+  /* Sizing & Effects */
+  --sidebar-width: 260px;
+  --border-radius-soft: 16px;   /* Softer, more modern rounded corners */
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --transition-speed: 0.3s ease;
+}
+
+/* =============================================
+   2. BASE & LAYOUT
+   ============================================= */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  position: fixed;
+  background-color: var(--bg-surface);
+  border-right: 1px solid var(--border-color);
+  padding: 1.5rem;
+}
+
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: 2.5rem;
+}
+
+/* =============================================
+   3. TYPOGRAPHY & NAVIGATION
+   ============================================= */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 2.5rem;
+}
+
+.sidebar-title {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.nav-links a {
+  display: block;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 500;
+  transition: var(--transition-speed);
+}
+
+.nav-links a:hover {
+  background-color: var(--bg-body);
+}
+
+.nav-links a.active {
+  background-color: var(--accent-color);
+  color: #fff;
+}
+
+/* =============================================
+   4. MODERN COMPONENTS (CARDS, FORMS, TABLES)
+   ============================================= */
+
+/* Universal style for all main containers */
+.card, .form-section, .list-section {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-soft);
+  box-shadow: var(--shadow-soft);
+  padding: 2rem;
+  transition: var(--transition-speed);
+}
+
+.card:hover, .form-section:hover, .list-section:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Forms */
+.form-control, .form-select {
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.2);
+}
+
+.btn-primary {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  transition: var(--transition-speed);
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+}
+
+
+/* Tables - This is a big visual upgrade! */
+.table {
+  border-collapse: separate; /* Important for border-radius */
+  border-spacing: 0;
+}
+
+.table thead {
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.table th {
+  border: none;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.table tbody tr {
+  transition: var(--transition-speed);
+}
+
+.table tbody tr:hover {
+  background-color: rgba(var(--accent-rgb), 0.05); /* Subtle blue highlight on hover */
+}
+
+.table td {
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+  vertical-align: middle;
+  border-top: 1px solid var(--border-color) !important; /* Override Bootstrap's border */
+}
+
+/* =============================================
+   5. RESPONSIVE DESIGN
+   ============================================= */
+@media (max-width: 992px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+}

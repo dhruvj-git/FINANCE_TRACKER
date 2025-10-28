@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Budgets</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2 class="sidebar-title">Finance Tracker</h2>
+      <nav class="nav-links">
+        <a href="index.html">🏠 Dashboard</a>
+        <a href="transaction.html">💳 Transactions</a>
+        <a href="budgets.html" class="active">📊 Budgets</a>
+        <a href="tags.html">🏷️ Tags</a>
+        <a href="categories.html">📂 Categories</a>
+        <a href="login.html">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      
+      <!-- Budget Form -->
+      <section class="form-section">
+        <h1>Set Budget</h1>
+        <form id="budgetForm" class="transaction-form">
+          
+          <!-- Category Dropdown -->
+          <div class="form-group">
+            <label for="category">Category:</label>
+            <select id="category" name="category_id" required>
+              <option value="">-- Select Category --</option>
+            </select>
+          </div>
+          
+          <!-- Month Picker -->
+          <div class="form-group">
+            <label for="month">Month:</label>
+            <input type="month" id="month" name="month" required />
+          </div>
+          
+          <!-- Budget Limit -->
+          <div class="form-group">
+            <label for="budget_limit">Limit (₹):</label>
+            <input 
+              type="number" 
+              id="budget_limit" 
+              name="budget_limit" 
+              placeholder="₹ Limit" 
+              required 
+              min="1" 
+            />
+          </div>
+          
+          <!-- Submit Button -->
+          <button type="submit" class="submit-btn">Set Budget</button>
+        </form>
+      </section>
+
+      <!-- Budget List -->
+      <section class="list-section">
+        <h2>Budget List</h2>
+        <table class="table table-striped table-hover"></table>
+        <table class="transaction-table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Category</th>
+              <th>Limit (₹)</th>
+            </tr>
+          </thead>
+          <tbody id="budgetTableBody">
+            <!-- JS will inject budget rows here -->
+          </tbody>
+        </table>
+        <table class="table table-hover"></table>
+      </section>
+    </main>
+
+  </div>
+
+  <!-- ✅ keep script at bottom so DOM loads first -->
+  <script src="js/budgets.js"></script>
+</body>
+</html>
