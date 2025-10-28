@@ -4,95 +4,99 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Transactions</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <h2 class="sidebar-title">Finance Tracker</h2>
-      <nav class="nav-links">
-        <a href="index.html">🏠 Dashboard</a>
-        <a href="transaction.html" class="active">💳 Transactions</a>
-        <a href="budgets.html">📊 Budgets</a>
-        <a href="tags.html">🏷️ Tags</a>
-        <a href="categories.html">📂 Categories</a>
-        <a href="login.html">🚪 Logout</a>
-      </nav>
-    </aside>
+  <div class="container-fluid">
+    <div class="row">
+      
+      <aside class="col-lg-2 col-md-3 p-0">
+        <div class="sidebar">
+          <h2 class="sidebar-title">Finance Tracker</h2>
+          <nav class="nav-links">
+            <a href="index.html">🏠 Dashboard</a>
+            <a href="transaction.html" class="active">💳 Transactions</a>
+            <a href="budgets.html">📊 Budgets</a>
+            <a href="tags.html">🏷️ Tags</a>
+            <a href="categories.html">📂 Categories</a>
+            <a href="login.html" id="logoutBtn">🚪 Logout</a>
+          </nav>
+        </div>
+      </aside>
 
-    <!-- Main content -->
-    <main class="main-content">
-      <section class="form-section">
-        <h1>Add Transaction</h1>
-        <form id="transactionForm" class="transaction-form">
-          <div class="form-group">
-            <label for="amount">Amount:</label>
-            <input type="number" id="amount" name="amount" required />
-          </div>
-          <div class="form-group">
-            <label for="description">Description:</label>
-            <input type="text" id="description" name="description" required />
-          </div>
-          <div class="form-group">
-            <label for="date">Date:</label>
-            <input type="date" id="date" name="date" required />
-          </div>
-          <div class="form-group">
-            <label for="category">Category:</label>
-            <select id="category" name="category" required>
-              <option value="">Loading categories...</option>
-            </select>
-          </div>
-          <div class="form-group">
-  <label for="tags-select">Tags (optional):</label>
-  <select id="tags-select" name="tag_ids" multiple>
-    </select>
-</div>
-           
-          <div class="form-group">
-            <label for="payment_mode">Payment Mode:</label>
-            <select id="payment_mode" name="payment_mode" required>
-              <option value="">Select Payment Mode</option>
-              <option value="UPI">UPI</option>
-              <option value="Cash">Cash</option>
-              <option value="Card">Card</option>
-              <option value="Others">Others</option>
-            </select>
-          </div>
-          <button type="submit" class="submit-btn">Add Transaction</button>
-        </form>
-      </section>
-      <table class="table table-striped table-hover"></table>
-      <section class="list-section">
-        <h2>Transaction List</h2>
-        <table class="transaction-table">
-          <thead>
-            <tr>
-              <th>Amount</th>
-              <th>Description</th>
-              <th>Date</th>
-              <th>Category</th>
-              <th>Payment Mode</th>
-              <th>Tags</th>
-            </tr>
-          </thead>
-          <tbody id="transactions-tbody">
-            <!-- Transactions will be inserted dynamically -->
-          </tbody>
-        </table>
-        <table class="table table-hover"></table>
-      </section>
-    </main>
+      <main class="col-lg-10 col-md-9 ms-sm-auto px-md-4 py-4">
+        
+        <section class="form-section mb-5">
+          <h1>Add Transaction</h1>
+          <form id="transactionForm" class="p-4 border rounded-3 bg-light shadow-sm">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="amount" class="form-label">Amount (₹)</label>
+                <input type="number" class="form-control" id="amount" name="amount" step="0.01" required placeholder="150.50"/>
+              </div>
+              <div class="col-md-6">
+                <label for="description" class="form-label">Description</label>
+                <input type="text" class="form-control" id="description" name="description" required placeholder="Coffee with friends"/>
+              </div>
+              
+              <div class="col-md-6">
+                <label for="transaction-datetime" class="form-label">Date & Time (Optional)</label>
+                <input type="datetime-local" class="form-control" id="transaction-datetime" name="transaction_date" />
+                <div class="form-text">Leave blank for current time.</div>
+              </div>
+              
+              <div class="col-md-6">
+                <label for="category" class="form-label">Category</label>
+                <select id="category" name="category_id" class="form-select" required>
+                  <option value="">Loading...</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="payment_mode" class="form-label">Payment Mode</label>
+                <select id="payment_mode" name="payment_mode" class="form-select" required>
+                  <option value="">Choose...</option>
+                  <option value="UPI">UPI</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Card">Card</option>
+                  <option value="Others">Others</option>
+                </select>
+              </div>
+               <div class="col-md-6"> 
+                <label for="tags-select" class="form-label">Tags (Ctrl/Cmd + Click)</label>
+                <select id="tags-select" name="tag_ids" class="form-select" multiple size="3"> 
+                </select>
+              </div>
+              <div class="col-12 mt-4">
+                 <button type="submit" class="btn btn-primary w-100">Add Transaction</button>
+              </div>
+            </div>
+          </form>
+        </section>
 
+        <section class="list-section">
+          <h2>Transaction List</h2>
+          <div class="table-responsive">
+            <table class="table table-hover table-sm">
+              <thead>
+                <tr>
+                  <th>Amount</th>
+                  <th>Description</th>
+                  <th>Date & Time</th>
+                  <th>Category</th>
+                  <th>Tags</th>
+                  <th>Payment Mode</th>
+                </tr>
+              </thead>
+              <tbody id="transactions-tbody">
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
   </div>
 
-  <!-- ✅ Ensure script loads after DOM is ready -->
-  <script src="js/transactions.js" defer></script>
+  <script src="js/transactions.js" defer></script> 
 </body>
 </html>
