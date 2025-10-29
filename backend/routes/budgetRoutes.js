@@ -1,17 +1,15 @@
+// backend/routes/budgetRoutes.js
 const express = require("express");
 const router = express.Router();
-const {
-  getBudgets,
-  addBudget,
-  updateBudget,
-  deleteBudget
-} = require("../controllers/budgetController");
+const { getBudgets, setBudget, deleteBudget } = require("../controllers/budgetController"); // <-- Added deleteBudget
+const authenticateToken = require("../middleware/authMiddleware");
 
-const authenticate = require("../middleware/authMiddleware");
+router.get("/", authenticateToken, getBudgets);
+router.post("/", authenticateToken, setBudget);
 
-router.get("/", authenticate, getBudgets);
-router.post("/", authenticate, addBudget);
-router.put("/:id", authenticate, updateBudget);
-router.delete("/:id", authenticate, deleteBudget);
+// --- START: NEW DELETE ROUTE ---
+// The :id will match the budgetId sent from the frontend
+router.delete("/:id", authenticateToken, deleteBudget);
+// --- END: NEW DELETE ROUTE ---
 
 module.exports = router;

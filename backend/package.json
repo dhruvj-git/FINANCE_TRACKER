@@ -13,7 +13,8 @@
     "dotenv": "^16.6.1",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.1",
-    "pg": "^8.11.3"
+    "pg": "^8.11.3",
+    "python-shell": "^5.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.3"

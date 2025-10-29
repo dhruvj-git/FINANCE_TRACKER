@@ -1,34 +1,69 @@
-const db = require('../db/db');
+// backend/controllers/summaryController.js
+const pool = require('../db/db');
 
-exports.getSummary = async (req, res) => {
-  const userId = req.user.user_id;  // ✅ Fix: consistent with all other controllers
+// This function now works because authMiddleware correctly sets req.user
+const getSummary = async (req, res) => {
+  const userId = req.user.user_id; // This will now work
+  console.log(`[summaryController] getSummary called for user_id: ${userId}`);
 
   try {
-    // ✅ Get total income
-    const incomeRes = await db.query(
-      `SELECT COALESCE(SUM(amount), 0) AS total_income 
-       FROM transaction 
-       INNER JOIN category ON transaction.category_id = category.category_id 
-       WHERE category.type = 'income' AND transaction.user_id = $1`,
+    // --- SCHEMA FIX ---
+    // Query to get total income (using 'category_type' and 'Income')
+    const incomeResult = await pool.query(
+      `SELECT SUM(t.amount) AS total_income
+       FROM transaction t
+       JOIN category c ON t.category_id = c.category_id
+       WHERE t.user_id = $1 AND c.category_type = 'Income'`,
       [userId]
     );
+    const totalIncome = parseFloat(incomeResult.rows[0]?.total_income) || 0;
 
-    // ✅ Get total expense
-    const expenseRes = await db.query(
-      `SELECT COALESCE(SUM(amount), 0) AS total_expense 
-       FROM transaction 
-       INNER JOIN category ON transaction.category_id = category.category_id 
-       WHERE category.type = 'expense' AND transaction.user_id = $1`,
+    // --- SCHEMA FIX ---
+    // Query to get total expenses (using 'category_type' and 'Expense')
+    const expenseResult = await pool.query(
+      `SELECT SUM(t.amount) AS total_expenses
+       FROM transaction t
+       JOIN category c ON t.category_id = c.category_id
+       WHERE t.user_id = $1 AND c.category_type = 'Expense'`,
       [userId]
     );
+    const totalExpenses = parseFloat(expenseResult.rows[0]?.total_expenses) || 0;
 
-    const total_income = parseFloat(incomeRes.rows[0].total_income);
-    const total_expense = parseFloat(expenseRes.rows[0].total_expense);
-    const balance = total_income - total_expense;
+    // Calculate balance
+    const balance = totalIncome - totalExpenses;
 
-    res.status(200).json({ total_income, total_expense, balance });
-  } catch (err) {
-    console.error("❌ Error in summaryController:", err.message);
-    res.status(500).json({ error: "Failed to load summary data" });
+    // --- SCHEMA FIX ---
+    // Query to get recent transactions (using 'transaction_date')
+    const recentTransactionsResult = await pool.query(
+      `SELECT
+         t.transaction_id AS id,
+         t.description,
+         t.amount,
+         c.category_type AS type,
+         t.transaction_date AS date,
+         t.category_id
+       FROM transaction t
+       LEFT JOIN category c ON t.category_id = c.category_id
+       WHERE t.user_id = $1
+       ORDER BY t.transaction_date DESC LIMIT 5`,
+      [userId]
+    );
+    const recentTransactions = recentTransactionsResult.rows;
+
+    console.log(`[summaryController] Summary fetched successfully for user_id: ${userId}`);
+    res.json({
+      totalIncome: totalIncome.toFixed(2),
+      totalExpenses: totalExpenses.toFixed(2),
+      balance: balance.toFixed(2),
+      recentTransactions,
+    });
+  } catch (error) {
+    console.error(`[summaryController] ❌ Error fetching summary for user_id: ${userId}`, error.stack || error);
+    res.status(500).json({ message: 'Server error fetching summary' });
   }
+};
+
+// Export *only* getSummary
+module.exports = {
+  getSummary
 };

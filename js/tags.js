@@ -1,4 +1,4 @@
-// js/tags.js (Complete File)
+// js/tags.js (Complete & Updated File)
 
 document.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("token");
@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- DOM Elements ---
   const tagForm = document.getElementById("tagForm");
-  // FIX: Target the new table body ID for clarity
   const tagTableBody = document.getElementById("tag-table-body");
 
   if (!tagForm || !tagTableBody) {
@@ -39,14 +38,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
       tags.forEach((tag) => {
         const row = document.createElement("tr");
-        // FIX: Updated row to display usage_count and better buttons
+        
+        // --- START OF MODIFICATION ---
+        // Updated button to use Bootstrap classes, icon, and "rounded-pill"
+        // to match the transactions page.
         row.innerHTML = `
           <td>${tag.tag_name}</td>
           <td>${tag.usage_count}</td>
           <td class="actions">
-            <button class="delete-btn" data-id="${tag.tag_id}">Delete</button>
+            <button class="btn btn-danger btn-sm rounded-pill delete-btn" data-id="${tag.tag_id}">
+                <i class="fas fa-trash-alt"></i> Delete
+            </button>
           </td>
         `;
+        // --- END OF MODIFICATION ---
+        
         tagTableBody.appendChild(row);
       });
 
@@ -61,9 +67,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Function to Attach Delete Listeners ---
   const attachDeleteListeners = () => {
+    // This function finds all buttons with the class "delete-btn"
+    // and adds the click event to them.
+    document.querySelectorAll(".delete-btn").forEach((btn) => {
+      // Remove old listener to prevent duplicates (good practice)
+      btn.replaceWith(btn.cloneNode(true));
+    });
+
     document.querySelectorAll(".delete-btn").forEach((btn) => {
       btn.addEventListener("click", async (e) => {
-        const id = e.target.getAttribute("data-id");
+        // Use currentTarget to ensure we get the button, even if user clicks the icon
+        const id = e.currentTarget.getAttribute("data-id"); 
+        
         if (confirm("Are you sure you want to delete this tag?")) {
           try {
             const delRes = await fetch(`http://localhost:5000/api/tags/${id}`, {
@@ -73,7 +88,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (delRes.ok) {
               loadTags(); // Refresh the list
             } else {
-              alert("❌ Failed to delete tag.");
+              const error = await delRes.json();
+              alert(`❌ Failed to delete tag: ${error.message || 'Unknown error'}`);
             }
           } catch (err) {
             console.error("Deletion error:", err);
@@ -100,7 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
         tagForm.reset();
         loadTags(); // Refresh the list
       } else {
-        alert("❌ Failed to add tag.");
+        const error = await res.json();
+        alert(`❌ Failed to add tag: ${error.message || 'Unknown error'}`);
       }
     } catch (err) {
       console.error("Error adding tag:", err);
