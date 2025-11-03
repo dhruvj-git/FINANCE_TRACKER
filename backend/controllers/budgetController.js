@@ -35,13 +35,21 @@ exports.setBudget = async (req, res) => {
     return res.status(400).json({ error: "Missing required fields: category_id, budget_limit, month" });
   }
 
+  // --- START OF FIX ---
+  // The <input type="month"> sends "YYYY-MM".
+  // PostgreSQL 'date' type needs "YYYY-MM-DD".
+  // We'll append "-01" to store it as the first day of that month.
+  const budget_date = `${month}-01`;
+  // --- END OF FIX ---
+
   try {
     const query = `
       INSERT INTO budget (user_id, category_id, budget_limit, month)
       VALUES ($1, $2, $3, $4)
       RETURNING *;
     `;
-    const { rows } = await pool.query(query, [user_id, category_id, budget_limit, month]);
+    // --- MODIFIED: Use budget_date instead of month ---
+    const { rows } = await pool.query(query, [user_id, category_id, budget_limit, budget_date]);
     res.status(201).json(rows[0]);
   } catch (err) {
     console.error("❌ Error in setBudget:", err.stack);
@@ -53,7 +61,7 @@ exports.setBudget = async (req, res) => {
   }
 };
 
-// --- START: NEW DELETE BUDGET FUNCTION ---
+// Delete a budget
 exports.deleteBudget = async (req, res) => {
     const { id } = req.params; // This is the budget_id from the URL
     const userId = req.user.user_id; // From authMiddleware
@@ -79,4 +87,3 @@ exports.deleteBudget = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-// --- END: NEW DELETE BUDGET FUNCTION ---

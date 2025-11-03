@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- DOM Elements ---
   const categoryForm = document.getElementById("categoryForm");
-  // FIX: Target the new table body ID
   const categoryTableBody = document.getElementById("category-table-body");
 
   if (!categoryForm || !categoryTableBody) {
@@ -38,13 +37,19 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // FIX: Create table rows (<tr>) instead of list items (<li>)
+      // Create table rows
       categories.forEach(cat => {
         const row = document.createElement("tr");
+        
+        // --- MODIFICATION: ADDED CLASS BASED ON TYPE ---
+        const typeClass = cat.category_type === 'Income' ? 'category-income' : 'category-expense';
+        
         row.innerHTML = `
-          <td>${cat.category_name}</td>
-          <td>${cat.category_type}</td>
+          <td class="${typeClass}">${cat.category_name}</td>
+          <td class="${typeClass}">${cat.category_type}</td>
         `;
+        // --- END MODIFICATION ---
+
         categoryTableBody.appendChild(row);
       });
 

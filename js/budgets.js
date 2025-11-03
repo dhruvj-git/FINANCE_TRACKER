@@ -1,4 +1,4 @@
-// js/budgets.js (Complete & Updated Version with correct button)
+// js/budgets.js (Complete & Updated Version with correct coloring)
 
 // --- Global variables for headers and table body ---
 let token = localStorage.getItem("token");
@@ -7,6 +7,9 @@ const headers = {
   "Content-Type": "application/json",
   Authorization: `Bearer ${token}`,
 };
+
+// --- NEW: Map to store category types by name ---
+let categoryTypes = new Map();
 
 // --- Function to Load Categories into Dropdown ---
 const loadCategories = async () => {
@@ -21,14 +24,17 @@ const loadCategories = async () => {
     const categories = await res.json();
     
     categorySelect.innerHTML = '<option value="">-- Select Category --</option>'; // Reset dropdown
+    categoryTypes.clear(); // Clear map
+
     categories.forEach((cat) => {
-      // Only show 'Expense' categories, as budgets are for expenses
-      if (cat.category_type === 'Expense') {
-        const option = document.createElement("option");
-        option.value = cat.category_id;
-        option.textContent = cat.category_name;
-        categorySelect.appendChild(option);
-      }
+      // --- MODIFICATION: Load ALL categories, not just Expense ---
+      const option = document.createElement("option");
+      option.value = cat.category_id;
+      option.textContent = cat.category_name;
+      categorySelect.appendChild(option);
+
+      // --- NEW: Populate the map ---
+      categoryTypes.set(cat.category_name, cat.category_type);
     });
     console.log("✅ Categories loaded for dropdown.");
   } catch (err) {
@@ -52,7 +58,6 @@ const loadBudgets = async () => {
     budgetTableBody.innerHTML = ""; // Clear existing table rows
 
     if (budgets.length === 0) {
-      // --- MODIFIED: colspan="4" ---
       budgetTableBody.innerHTML = '<tr><td colspan="4">No budgets set. Add one above!</td></tr>';
       return;
     }
@@ -64,11 +69,15 @@ const loadBudgets = async () => {
       const formattedMonth = monthDate.toLocaleString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 
       // --- START OF MODIFICATION ---
-      // Added the 4th <td> with the delete button
-      // Used "rounded-pill" class to match transaction.html
+      // Get category type from our map
+      const categoryName = b.category_name;
+      const categoryType = categoryTypes.get(categoryName);
+      // Determine class based on type
+      const typeClass = categoryType === 'Income' ? 'category-income' : (categoryType === 'Expense' ? 'category-expense' : '');
+
       row.innerHTML = `
         <td>${formattedMonth}</td>
-        <td>${b.category_name}</td>
+        <td class="${typeClass}">${categoryName}</td>
         <td>₹${parseFloat(b.budget_limit).toFixed(2)}</td>
         <td>
           <button 
@@ -86,7 +95,6 @@ const loadBudgets = async () => {
     console.log("✅ Budgets loaded and displayed in the table.");
   } catch (err) {
     console.error("❌ Error loading budgets:", err);
-    // --- MODIFIED: colspan="4" ---
     budgetTableBody.innerHTML = '<tr><td colspan="4">Error loading budgets.</td></tr>';
   }
 };
@@ -138,7 +146,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!res.ok) {
         const errorData = await res.json();
-        // Use the specific error from your controller
         if (errorData.error && errorData.error.includes('already exists')) {
             alert("A budget for this category and month already exists.");
         } else {
@@ -156,19 +163,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- Initial Page Load ---
-  loadCategories();
-  loadBudgets();
+  // --- MODIFIED: Initial Page Load (to prevent race condition) ---
+  async function initializePage() {
+    await loadCategories(); // Wait for map to be built
+    await loadBudgets();    // Then load budgets which use the map
+  }
+  initializePage();
 });
 
 
-// --- START: NEW DELETE FUNCTION ---
-// This function is placed in the global scope so the
-// inline 'onclick' attribute can find it.
+// --- Global Delete Function ---
 async function deleteBudget(budgetId) {
     if (!token) return handleAuthError();
 
-    // Confirm before deleting
     if (!confirm('Are you sure you want to delete this budget?')) {
         return;
     }
@@ -188,7 +195,6 @@ async function deleteBudget(budgetId) {
             throw new Error(errorData.message || 'Failed to delete budget');
         }
 
-        // If successful, refresh the budget list
         alert('Budget deleted successfully');
         loadBudgets(); // Refresh the table
 
@@ -197,4 +203,3 @@ async function deleteBudget(budgetId) {
         alert(`Error: ${error.message}`);
     }
 }
-// --- END: NEW DELETE FUNCTION ---

@@ -1,4 +1,4 @@
-// index.js (Complete, Corrected File)
+// backend/index.js
 
 // -------------------------------
 // 1. IMPORTS & SETUP
@@ -6,6 +6,9 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+
+// --- Import Middleware ---
+const authMiddleware = require('./middleware/authMiddleware');
 
 const app = express();
 
@@ -16,7 +19,7 @@ app.use(cors());
 app.use(express.json());
 
 // -------------------------------
-// 3. LOGGING (Optional - remove for production)
+// 3. LOGGING (Optional)
 // -------------------------------
 console.log("🧪 JWT_SECRET from .env:", process.env.JWT_SECRET);
 
@@ -32,21 +35,26 @@ const transactionRoutes = require('./routes/transactionRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const tagRoutes = require('./routes/tagRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
-// ✅ FIX: This line was missing. You need to import the routes.
-const dashboardRoutes = require('./routes/dashboardRoutes'); 
+const dashboardRoutes = require('./routes/dashboardRoutes.js'); 
+// ✅ This line imports the file from Step 2
+const analysisRoutes = require('./routes/analysisRoutes');     
 
-// Log route loading (Optional)
-console.log("✅ Routes loaded: auth, register, user, transaction, category, tag, budget, dashboard");
+console.log("✅ Routes loaded: auth, register, user, transaction, category, tag, budget, dashboard, analysis");
 
-// Mount all routes
+// --- Mount Public Routes ---
 app.use('/auth', authRoutes);
 app.use('/register', registerRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/transactions', transactionRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/tags', tagRoutes);
-app.use('/api/budgets', budgetRoutes);
-app.use('/api/dashboard', dashboardRoutes); // This line will now work
+
+// --- Mount Protected API Routes ---
+app.use('/api/users', authMiddleware, userRoutes);
+app.use('/api/transactions', authMiddleware, transactionRoutes);
+app.use('/api/categories', authMiddleware, categoryRoutes);
+app.use('/api/tags', authMiddleware, tagRoutes);
+app.use('/api/budgets', authMiddleware, budgetRoutes);
+app.use('/api/dashboard', authMiddleware, dashboardRoutes); 
+
+// ✅ This line (line 58) will now work
+app.use('/api/analysis', authMiddleware, analysisRoutes); 
 
 // -------------------------------
 // 5. START SERVER

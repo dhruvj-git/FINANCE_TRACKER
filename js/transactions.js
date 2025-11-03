@@ -1,4 +1,4 @@
-// js/transactions.js (Complete, Updated File)
+// js/transactions.js (Complete, Updated File with bug fix)
 
 document.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("token");
@@ -13,9 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const categorySelect = document.getElementById("category");
   const tagsSelect = document.getElementById("tags-select");
   const transactionsTbody = document.getElementById("transactions-tbody");
-  const transactionDateTimeField = document.getElementById("transaction-datetime"); // Get the optional field
+  const transactionDateTimeField = document.getElementById("transaction-datetime"); 
 
-  // Add check for the new date/time field
+  let categoryTypes = new Map();
+
   if (!form || !categorySelect || !tagsSelect || !transactionsTbody || !transactionDateTimeField) {
     console.error("❌ Required DOM elements not found. Check your HTML IDs.");
     if (transactionsTbody) {
@@ -39,25 +40,28 @@ document.addEventListener("DOMContentLoaded", () => {
       if (res.status === 401) {
           console.error("❌ Unauthorized (401): Invalid token during category load.");
           categorySelect.innerHTML = `<option value="">Auth Error</option>`;
-          transactionsTbody.innerHTML = `<tr><td colspan="7">Authentication error. Please log in again.</td></tr>`; // Colspan 7
-          return;
+          transactionsTbody.innerHTML = `<tr><td colspan="7">Authentication error. Please log in again.</td></tr>`;
+          return; // <-- FIX: Stop execution
       }
       if (!res.ok) {
           const errorText = await res.text();
           console.error(`❌ Category fetch failed: Status ${res.status}. Response: ${errorText}`);
           categorySelect.innerHTML = `<option value="">Load Failed</option>`;
-          // Allow script to continue loading other data if categories fail
-          // return; // Removed this
+          return; // <-- FIX: Stop execution
       }
 
       if (res.ok) {
         const categories = await res.json();
         categorySelect.innerHTML = `<option value="">Select Category</option>`;
+        
+        categoryTypes.clear(); 
+
         categories.forEach((cat) => {
           const option = document.createElement("option");
           option.value = cat.category_id;
           option.textContent = cat.category_name;
           categorySelect.appendChild(option);
+          categoryTypes.set(cat.category_name, cat.category_type);
         });
         console.log("✅ Categories loaded successfully.");
       }
@@ -128,13 +132,15 @@ document.addEventListener("DOMContentLoaded", () => {
             dateTimeString = "N/A";
         }
 
-        // ✅ FIX: Removed the incorrect comment syntax
-        // ✅ FIX: Added new <td> for delete button
+        const categoryName = tran.category || "N/A";
+        const categoryType = categoryTypes.get(categoryName); // Get type from map
+        const typeClass = categoryType === 'Income' ? 'category-income' : (categoryType === 'Expense' ? 'category-expense' : '');
+
         row.innerHTML = `
           <td>${parseFloat(tran.amount).toFixed(2)}</td>
           <td>${tran.description || "-"}</td>
           <td>${dateTimeString}</td>
-          <td>${tran.category || "N/A"}</td>
+          <td class="${typeClass}">${categoryName}</td>
           <td>${tran.tags || ""}</td>
           <td>${tran.payment_mode || "-"}</td>
           <td>
@@ -158,9 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Attach Delete Button Listeners ---
   const attachDeleteListeners = () => {
-    // Use event delegation on the table body for efficiency
     transactionsTbody.addEventListener('click', function(event) {
-        // Check if the clicked element is a delete button
         if (event.target.classList.contains('delete-transaction-btn') || event.target.closest('.delete-transaction-btn')) {
             const button = event.target.closest('.delete-transaction-btn');
             handleDeleteTransaction(button);
@@ -213,7 +217,6 @@ document.addEventListener("DOMContentLoaded", () => {
       tag_ids: tag_ids,
     };
 
-    // Conditionally add transaction_date if user entered one
     const userDateTime = transactionDateTimeField.value;
     if (userDateTime) {
         try {
@@ -269,9 +272,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Initial Page Load ---
   async function initializePage() {
-    await loadCategories();
+    await loadCategories(); // This now populates the map and correctly stops on error
     await loadTags();
-    await loadTransactions();
+    await loadTransactions(); // This will only run if categories loaded successfully
   }
   initializePage();
 
