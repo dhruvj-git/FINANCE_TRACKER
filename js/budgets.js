@@ -66,6 +66,9 @@ const loadBudgets = async () => {
       const row = document.createElement("tr");
 
       const monthDate = new Date(b.month);
+      
+      // --- THIS LINE FIXES THE DATE BUG ---
+      // Forcing the timeZone to UTC prevents the date from rolling back to October.
       const formattedMonth = monthDate.toLocaleString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 
       // --- START OF MODIFICATION ---
@@ -84,7 +87,7 @@ const loadBudgets = async () => {
             class="btn btn-danger btn-sm rounded-pill" 
             onclick="deleteBudget(${b.budget_id})"
           >
-              <i class="fas fa-trash-alt"></i> Delete
+            <i class="fas fa-trash-alt"></i> Delete
           </button>
         </td>
       `;
@@ -156,6 +159,10 @@ document.addEventListener("DOMContentLoaded", () => {
       
       console.log("✅ Budget added successfully.");
       budgetForm.reset();
+      
+      // --- THIS IS THE OTHER PART OF THE FIX ---
+      // Instead of manually adding a row (which had the bug),
+      // you just reload all budgets from the server. This is a great solution!
       loadBudgets(); // Refresh the list to show the new budget
 
     } catch (err) {

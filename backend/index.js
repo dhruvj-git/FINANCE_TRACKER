@@ -38,8 +38,8 @@ const budgetRoutes = require('./routes/budgetRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes.js'); 
 // ✅ This line imports the file from Step 2
 const analysisRoutes = require('./routes/analysisRoutes');     
-
-console.log("✅ Routes loaded: auth, register, user, transaction, category, tag, budget, dashboard, analysis");
+const chartRoutes = require('./routes/chartRoutes.js');
+console.log("✅ Routes loaded: auth, register, user, transaction, category, tag, budget, dashboard, analysis, charts");
 
 // --- Mount Public Routes ---
 app.use('/auth', authRoutes);
@@ -55,6 +55,8 @@ app.use('/api/dashboard', authMiddleware, dashboardRoutes);
 
 // ✅ This line (line 58) will now work
 app.use('/api/analysis', authMiddleware, analysisRoutes); 
+// The corrected line
+app.use('/api/charts', authMiddleware, chartRoutes);
 
 // -------------------------------
 // 5. START SERVER

@@ -8,7 +8,7 @@ exports.getBudgets = async (req, res) => {
     const query = `
       SELECT 
         b.budget_id, 
-        b.month, 
+        TO_CHAR(b.month, 'YYYY-MM-DD') AS month,  -- <-- *** THE FIX ***
         b.budget_limit, 
         c.category_name,
         c.category_id
@@ -50,7 +50,21 @@ exports.setBudget = async (req, res) => {
     `;
     // --- MODIFIED: Use budget_date instead of month ---
     const { rows } = await pool.query(query, [user_id, category_id, budget_limit, budget_date]);
-    res.status(201).json(rows[0]);
+    
+    // --- NEW: Manually format the returned month string to match the getBudgets() fix ---
+    // This ensures the row returned from a POST matches the row from a GET
+    const newBudget = rows[0];
+    if (newBudget.month instanceof Date) {
+        const d = newBudget.month;
+        // Pad month and day with leading zeros if needed
+        const year = d.getFullYear();
+        const monthStr = String(d.getMonth() + 1).padStart(2, '0');
+        const dayStr = String(d.getDate()).padStart(2, '0');
+        newBudget.month = `${year}-${monthStr}-${dayStr}`;
+    }
+    
+    res.status(201).json(newBudget);
+
   } catch (err) {
     console.error("❌ Error in setBudget:", err.stack);
     // Check for unique constraint violation (user_id, category_id, month)
