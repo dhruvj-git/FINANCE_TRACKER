@@ -51,10 +51,10 @@ app.use('/api/transactions', authMiddleware, transactionRoutes);
 app.use('/api/categories', authMiddleware, categoryRoutes);
 app.use('/api/tags', authMiddleware, tagRoutes);
 app.use('/api/budgets', authMiddleware, budgetRoutes);
-app.use('/api/dashboard', authMiddleware, dashboardRoutes); 
+app.use('/api/dashboard', authMiddleware, dashboardRoutes);
 
 // ✅ This line (line 58) will now work
-app.use('/api/analysis', authMiddleware, analysisRoutes); 
+app.use('/api/analysis', authMiddleware, analysisRoutes);
 // The corrected line
 app.use('/api/charts', authMiddleware, chartRoutes);
 

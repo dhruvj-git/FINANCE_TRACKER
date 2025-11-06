@@ -1,5 +1,6 @@
 // js/dashboard_summary.js
 
+
 document.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -24,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- Load All Dashboard Components ---
-  
+
   // 1. Load your original summary cards (using your function)
   loadDashboardData(token, headers);
   
@@ -33,6 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
   loadExpenseChart(token, headers);
   loadMonthlyExpenseChart(token, headers);
 });
+
+
 
 
 // --- 1. YOUR ORIGINAL FUNCTION (NOW FIXED) ---

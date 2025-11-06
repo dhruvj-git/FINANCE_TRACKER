@@ -1,7 +1,31 @@
 // backend/controllers/dashboardController.js (Reverted File)
 
 const pool = require('../db/db'); // Use pool
+exports.getProfile = async (req, res) => {
+  try {
+    // tolerant lookup for where middleware may have stored user id
+    const userId =
+      (req.user && (req.user.user_id || req.user.id || req.userId)) ||
+      req.userId ||
+      req.user?.user_id ||
+      req.user?.id;
 
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+    const q = 'SELECT user_id, username, email FROM app_user WHERE user_id = $1';
+    const { rows } = await db.query(q, [userId]);
+
+    if (!rows[0]) return res.status(404).json({ error: 'User not found' });
+
+    const user = rows[0];
+    const displayName = user.username || user.email || `User${user.user_id}`;
+
+    return res.json({ user_id: user.user_id, name: displayName });
+  } catch (err) {
+    console.error('getProfile error', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
 // --- GET Dashboard Summary (Only this function remains) ---
 exports.getDashboardSummary = async (req, res) => {
   const userId = req.user?.user_id;

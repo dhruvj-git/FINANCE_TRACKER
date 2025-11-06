@@ -1,7 +1,8 @@
 // backend/routes/budgetRoutes.js
 const express = require("express");
 const router = express.Router();
-const { getBudgets, setBudget, deleteBudget } = require("../controllers/budgetController"); // <-- Added deleteBudget
+// Import the new function we are about to create
+const { getBudgets, setBudget, deleteBudget } = require("../controllers/budgetController"); 
 const authenticateToken = require("../middleware/authMiddleware");
 
 router.get("/", authenticateToken, getBudgets);

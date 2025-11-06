@@ -1,12 +1,11 @@
-
-// routes/authRoutes.js
 const express = require("express");
 const router = express.Router();
-
 const { loginUser, registerUser } = require("../controllers/authController");
 
-router.post("/login", loginUser);
+// POST /auth/register
 router.post("/register", registerUser);
-console.log("👤 loginUser:", loginUser); // should NOT be undefined
 
-module.exports =  router;
+// POST /auth/login
+router.post("/login", loginUser);
+
+module.exports = router;
